@@ -19,3 +19,5 @@ Contributions in the form of [issues](https://github.com/ekvedaras/dcb-eventstor
 ## License
 
 See [LICENSE](./LICENSE)
+
+CI test
