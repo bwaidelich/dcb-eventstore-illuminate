@@ -12,6 +12,7 @@ use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Facade;
+use PHPUnit\Framework\Attributes\After;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use Webmozart\Assert\Assert;
 use Wwwision\DCBEventStore\EventStore;
@@ -42,6 +43,12 @@ final class ConcurrencyTest extends EventStoreConcurrencyTestBase
         $connection->table(self::$eventTableName)->truncate();
     }
 
+    #[After]
+    public function __internalDisableErrorHandler(): void
+    {
+        restore_exception_handler();
+    }
+
     protected static function createEventStore(): EventStore
     {
         if (self::$eventStore === null) {
@@ -53,8 +60,16 @@ final class ConcurrencyTest extends EventStoreConcurrencyTestBase
     private static function connection(): Connection
     {
         if (self::$connection === null) {
+            if (file_exists(__DIR__ . '/../../vendor/symfony/polyfill-php85/bootstrap.php')) {
+                require __DIR__ . '/../../vendor/symfony/polyfill-php85/bootstrap.php';
+            }
+
             require __DIR__ . '/../../vendor/laravel/framework/src/Illuminate/Support/helpers.php';
             require __DIR__ . '/../../vendor/laravel/framework/src/Illuminate/Collections/helpers.php';
+
+            if (file_exists(__DIR__ . '/../../vendor/laravel/framework/src/Illuminate/Collections/functions.php')) {
+                require __DIR__ . '/../../vendor/laravel/framework/src/Illuminate/Collections/functions.php';
+            }
 
             $app = new Application();
             $app->instance('config', new Repository([]));
